@@ -192,11 +192,13 @@ async function getArtifacts(account_id: string, run_id: number): Promise<void> {
     `/accounts/${account_id}/runs/${run_id}/artifacts/run_results.json`,
   );
   const run_results = res.data;
+  
+  let catalog_data: any;
   if (core.getBooleanInput("fetch_catalog")) {
     const catalog = await dbt_cloud_api.get(
     `/accounts/${account_id}/runs/${run_id}/artifacts/catalog.json`,
     );
-    const catalog_data = catalog.data;
+    catalog_data = catalog.data;
   }
   
   const manifest = await dbt_cloud_api.get(
