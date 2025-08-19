@@ -55222,8 +55222,11 @@ async function getJobRun(account_id, run_id) {
 async function getArtifacts(account_id, run_id) {
     const res = await dbt_cloud_api.get(`/accounts/${account_id}/runs/${run_id}/artifacts/run_results.json`);
     const run_results = res.data;
-    const catalog = await dbt_cloud_api.get(`/accounts/${account_id}/runs/${run_id}/artifacts/catalog.json`);
-    const catalog_data = catalog.data;
+    let catalog_data;
+    if (coreExports.getBooleanInput("fetch_catalog")) {
+        const catalog = await dbt_cloud_api.get(`/accounts/${account_id}/runs/${run_id}/artifacts/catalog.json`);
+        catalog_data = catalog.data;
+    }
     const manifest = await dbt_cloud_api.get(`/accounts/${account_id}/runs/${run_id}/artifacts/manifest.json`);
     const manifest_data = manifest.data;
     coreExports.info("Saving artifacts in target directory");
@@ -55232,7 +55235,9 @@ async function getArtifacts(account_id, run_id) {
         fs.mkdirSync(dir);
     }
     fs.writeFileSync(`${dir}/run_results.json`, JSON.stringify(run_results));
-    fs.writeFileSync(`${dir}/catalog.json`, JSON.stringify(catalog_data));
+    if (coreExports.getBooleanInput("fetch_catalog")) {
+        fs.writeFileSync(`${dir}/catalog.json`, JSON.stringify(catalog_data));
+    }
     fs.writeFileSync(`${dir}/manifest.json`, JSON.stringify(manifest_data));
 }
 async function executeAction() {
